@@ -1,0 +1,61 @@
+# AWS Configuration
+aws_region = "us-east-1"
+environment = "dev"
+project_name = "aws-soc-lab"
+
+# Network Configuration
+vpc_cidr = "10.0.0.0/16"
+public_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
+private_subnet_cidrs = ["10.0.3.0/24", "10.0.4.0/24"]
+
+# EC2 Configuration
+key_name = "your-aws-key-pair-name"  # REQUIRED: Replace with your AWS key pair name
+
+# Instance Types (adjust based on your needs and budget)
+instance_types = {
+  wazuh_server     = "t3.large"   # 2 vCPU, 8GB RAM - $60/month
+  windows_endpoint = "t3.micro"   # 1 vCPU, 1GB RAM - $8/month
+  linux_endpoint   = "t3.micro"   # 1 vCPU, 1GB RAM - $8/month
+  kali_attacker    = "t3.small"   # 1 vCPU, 2GB RAM - $15/month
+  jump_box         = "t3.micro"   # 1 vCPU, 1GB RAM - $8/month
+}
+
+# Security Configuration
+# IMPORTANT: Restrict this to your IP address for security
+# Find your IP: curl https://ipinfo.io/ip
+allowed_cidr_blocks = ["0.0.0.0/0"]  # CHANGE THIS: Use your public IP/32
+
+# Component Toggles (set to false to disable)
+enable_windows_endpoint = true
+enable_linux_endpoint = true
+enable_kali_attacker = true
+enable_vulnerable_apps = true
+
+# Monitoring and Logging
+enable_vpc_flow_logs = true
+enable_cloudtrail = true
+log_retention_days = 30
+
+# Cost Optimization
+use_spot_instances = false  # Set to true to reduce costs (may cause interruptions)
+auto_shutdown_time = "18:00"  # 24h format, instances auto-shutdown time
+
+# Wazuh Configuration
+wazuh_version = "4.7.3"
+
+# Common Tags
+common_tags = {
+  Project     = "AWS-SOC-Lab"
+  Environment = "Development"
+  Owner       = "YourName"           # Change this
+  Purpose     = "Security-Training"
+  CostCenter  = "Training"
+  AutoShutdown = "true"
+}
+
+# Notes:
+# 1. Make sure to create an AWS key pair before deployment
+# 2. Update allowed_cidr_blocks with your public IP for security
+# 3. Adjust instance types based on your budget and performance needs
+# 4. Enable/disable components based on your learning objectives
+# 5. Consider using spot instances for cost savings (use_spot_instances = true)
