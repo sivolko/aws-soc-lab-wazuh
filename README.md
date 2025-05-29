@@ -478,6 +478,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-*Built with ❤️ by the cybersecurity community for hands-on security education*
+*Built with ❤️ by Shubhendu for the cybersecurity community to encourage hands-on security education*
 
 </div>
