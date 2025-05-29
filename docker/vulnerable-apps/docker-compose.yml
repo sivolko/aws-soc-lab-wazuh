@@ -1,0 +1,222 @@
+# Vulnerable Applications for SOC Lab Testing
+# These applications are intentionally vulnerable for educational purposes
+
+version: '3.8'
+
+services:
+  # DVWA - Damn Vulnerable Web Application
+  dvwa:
+    image: vulnerables/web-dvwa:latest
+    container_name: soc-lab-dvwa
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      - MYSQL_HOSTNAME=dvwa-mysql
+      - MYSQL_DATABASE=dvwa
+      - MYSQL_USERNAME=dvwa
+      - MYSQL_PASSWORD=password
+      - RECAPTCHA_PRIV_KEY=""
+      - RECAPTCHA_PUB_KEY=""
+    depends_on:
+      - dvwa-mysql
+    networks:
+      - vuln-apps-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dvwa.rule=Host(`dvwa.soc-lab.local`)"
+      - "traefik.http.services.dvwa.loadbalancer.server.port=80"
+
+  # MySQL for DVWA
+  dvwa-mysql:
+    image: mysql:5.7
+    container_name: soc-lab-dvwa-mysql
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=dvwa
+      - MYSQL_USER=dvwa
+      - MYSQL_PASSWORD=password
+    volumes:
+      - dvwa-mysql-data:/var/lib/mysql
+    networks:
+      - vuln-apps-network
+
+  # WebGoat - OWASP WebGoat
+  webgoat:
+    image: webgoat/goatandwolf:latest
+    container_name: soc-lab-webgoat
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+      - "9001:9001"
+    environment:
+      - WEBGOAT_PORT=8080
+      - WEBWOLF_PORT=9001
+    networks:
+      - vuln-apps-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.webgoat.rule=Host(`webgoat.soc-lab.local`)"
+      - "traefik.http.services.webgoat.loadbalancer.server.port=8080"
+
+  # OWASP Juice Shop
+  juice-shop:
+    image: bkimminich/juice-shop:latest
+    container_name: soc-lab-juice-shop
+    restart: unless-stopped
+    ports:
+      - "8082:3000"
+    networks:
+      - vuln-apps-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.juice-shop.rule=Host(`juice-shop.soc-lab.local`)"
+      - "traefik.http.services.juice-shop.loadbalancer.server.port=3000"
+
+  # Mutillidae II - OWASP Mutillidae
+  mutillidae:
+    image: citizenstig/nowasp:latest
+    container_name: soc-lab-mutillidae
+    restart: unless-stopped
+    ports:
+      - "8083:80"
+    networks:
+      - vuln-apps-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mutillidae.rule=Host(`mutillidae.soc-lab.local`)"
+      - "traefik.http.services.mutillidae.loadbalancer.server.port=80"
+
+  # Vulnerable WordPress
+  wordpress:
+    image: wordpress:4.6
+    container_name: soc-lab-wordpress
+    restart: unless-stopped
+    ports:
+      - "8084:80"
+    environment:
+      - WORDPRESS_DB_HOST=wordpress-mysql
+      - WORDPRESS_DB_USER=wordpress
+      - WORDPRESS_DB_PASSWORD=password
+      - WORDPRESS_DB_NAME=wordpress
+    volumes:
+      - wordpress-data:/var/www/html
+    depends_on:
+      - wordpress-mysql
+    networks:
+      - vuln-apps-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wordpress.rule=Host(`wordpress.soc-lab.local`)"
+      - "traefik.http.services.wordpress.loadbalancer.server.port=80"
+
+  # MySQL for WordPress
+  wordpress-mysql:
+    image: mysql:5.7
+    container_name: soc-lab-wordpress-mysql
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=wordpress
+      - MYSQL_USER=wordpress
+      - MYSQL_PASSWORD=password
+    volumes:
+      - wordpress-mysql-data:/var/lib/mysql
+    networks:
+      - vuln-apps-network
+
+  # NodeGoat - OWASP NodeGoat
+  nodegoat:
+    image: owasp/nodegoat:latest
+    container_name: soc-lab-nodegoat
+    restart: unless-stopped
+    ports:
+      - "8085:4000"
+    environment:
+      - MONGODB_URI=mongodb://nodegoat-mongo:27017/nodegoat
+    depends_on:
+      - nodegoat-mongo
+    networks:
+      - vuln-apps-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nodegoat.rule=Host(`nodegoat.soc-lab.local`)"
+      - "traefik.http.services.nodegoat.loadbalancer.server.port=4000"
+
+  # MongoDB for NodeGoat
+  nodegoat-mongo:
+    image: mongo:3.4
+    container_name: soc-lab-nodegoat-mongo
+    restart: unless-stopped
+    volumes:
+      - nodegoat-mongo-data:/data/db
+    networks:
+      - vuln-apps-network
+
+  # Damn Vulnerable GraphQL Application
+  dvga:
+    image: dolevf/dvga:latest
+    container_name: soc-lab-dvga
+    restart: unless-stopped
+    ports:
+      - "8086:5013"
+    networks:
+      - vuln-apps-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dvga.rule=Host(`dvga.soc-lab.local`)"
+      - "traefik.http.services.dvga.loadbalancer.server.port=5013"
+
+  # Vulnerable REST API
+  vulnerable-api:
+    image: vulnerables/web-dvwa:latest
+    container_name: soc-lab-vulnerable-api
+    restart: unless-stopped
+    ports:
+      - "8087:80"
+    networks:
+      - vuln-apps-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.vulnerable-api.rule=Host(`api.soc-lab.local`)"
+      - "traefik.http.services.vulnerable-api.loadbalancer.server.port=80"
+
+  # Traefik Reverse Proxy (optional)
+  traefik:
+    image: traefik:v2.9
+    container_name: soc-lab-traefik
+    restart: unless-stopped
+    ports:
+      - "8080:8080"  # Traefik dashboard
+      - "80:80"      # HTTP
+      - "443:443"    # HTTPS
+    command:
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - vuln-apps-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.soc-lab.local`)"
+      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+
+volumes:
+  dvwa-mysql-data:
+    driver: local
+  wordpress-data:
+    driver: local
+  wordpress-mysql-data:
+    driver: local
+  nodegoat-mongo-data:
+    driver: local
+
+networks:
+  vuln-apps-network:
+    driver: bridge
+    name: vuln-apps-network

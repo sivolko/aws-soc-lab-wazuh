@@ -1,0 +1,166 @@
+<!-- Local rules for SOC Lab -->
+
+<group name="local,syslog,sshd,">
+
+  <!-- Custom SSH brute force detection -->
+  <rule id="100010" level="10">
+    <if_matched_sid>5720</if_matched_sid>
+    <description>SSH brute force attack detected (SOC Lab)</description>
+    <group>authentication_failed,pci_dss_10.2.4,pci_dss_10.2.5,pci_dss_11.4,mitre_t1110,</group>
+  </rule>
+
+  <!-- Custom web application attack detection -->
+  <rule id="100020" level="8">
+    <if_group>web</if_group>
+    <url>sqlmap|union|select|insert|delete|drop|create|alter|script|javascript|vbscript|onload|onerror</url>
+    <description>Web application attack detected (SOC Lab)</description>
+    <group>web_attack,pci_dss_6.5,pci_dss_11.4,mitre_t1190,</group>
+  </rule>
+
+  <!-- Custom command injection detection -->
+  <rule id="100030" level="10">
+    <if_group>web</if_group>
+    <url>cmd=|exec=|system=|passthru=|shell_exec|eval|assert</url>
+    <description>Command injection attempt detected (SOC Lab)</description>
+    <group>web_attack,command_injection,pci_dss_6.5,mitre_t1190,</group>
+  </rule>
+
+  <!-- File upload attack detection -->
+  <rule id="100040" level="8">
+    <if_group>web</if_group>
+    <url>php|asp|jsp|exe|bat|sh|pl|py|rb</url>
+    <match>POST|PUT</match>
+    <description>Suspicious file upload detected (SOC Lab)</description>
+    <group>web_attack,file_upload,pci_dss_6.5,mitre_t1105,</group>
+  </rule>
+
+  <!-- PowerShell script execution detection -->
+  <rule id="100050" level="8">
+    <if_group>windows</if_group>
+    <match>powershell|cmd.exe|wscript|cscript</match>
+    <description>Script execution detected (SOC Lab)</description>
+    <group>script_execution,mitre_t1059,</group>
+  </rule>
+
+  <!-- Suspicious process creation -->
+  <rule id="100060" level="6">
+    <if_group>windows</if_group>
+    <field name="win.eventdata.image">.*\\(whoami|net|nltest|ping|nslookup|ipconfig|systeminfo|tasklist|wmic|reg|sc)\.exe$</field>
+    <description>Suspicious process execution detected (SOC Lab)</description>
+    <group>suspicious_process,mitre_t1057,mitre_t1082,</group>
+  </rule>
+
+  <!-- Credential dumping detection -->
+  <rule id="100070" level="12">
+    <if_group>windows</if_group>
+    <field name="win.eventdata.image">.*\\(mimikatz|pwdump|gsecdump|wce|procdump)\.exe$</field>
+    <description>Credential dumping tool detected (SOC Lab)</description>
+    <group>credential_dumping,mitre_t1003,</group>
+  </rule>
+
+  <!-- Network reconnaissance detection -->
+  <rule id="100080" level="6">
+    <if_group>syslog</if_group>
+    <match>nmap|masscan|zmap|unicornscan</match>
+    <description>Network reconnaissance activity detected (SOC Lab)</description>
+    <group>network_recon,mitre_t1046,</group>
+  </rule>
+
+  <!-- Lateral movement detection -->
+  <rule id="100090" level="8">
+    <if_group>windows</if_group>
+    <field name="win.eventdata.image">.*\\(psexec|winrs|wmic|schtasks)\.exe$</field>
+    <description>Potential lateral movement detected (SOC Lab)</description>
+    <group>lateral_movement,mitre_t1021,mitre_t1053,</group>
+  </rule>
+
+  <!-- Data exfiltration detection -->
+  <rule id="100100" level="8">
+    <if_group>syslog</if_group>
+    <match>curl|wget|ftp|scp|rsync|nc|netcat</match>
+    <url>\.(zip|tar|gz|rar|7z|sql|csv|txt|doc|docx|pdf|xls|xlsx)$</url>
+    <description>Potential data exfiltration detected (SOC Lab)</description>
+    <group>data_exfiltration,mitre_t1041,mitre_t1002,</group>
+  </rule>
+
+  <!-- Persistence mechanism detection -->
+  <rule id="100110" level="8">
+    <if_group>windows</if_group>
+    <field name="win.eventdata.targetObject">.*\\(CurrentVersion\\Run|CurrentVersion\\RunOnce|Winlogon|Services)\\.*</field>
+    <description>Persistence mechanism detected (SOC Lab)</description>
+    <group>persistence,mitre_t1547,mitre_t1053,</group>
+  </rule>
+
+  <!-- Defense evasion detection -->
+  <rule id="100120" level="8">
+    <if_group>windows</if_group>
+    <match>wevtutil|sdelete|cipher|bcdedit</match>
+    <description>Defense evasion technique detected (SOC Lab)</description>
+    <group>defense_evasion,mitre_t1070,mitre_t1562,</group>
+  </rule>
+
+  <!-- Suspicious DNS queries -->
+  <rule id="100130" level="6">
+    <if_group>syslog</if_group>
+    <match>dnscat|iodine|dns2tcp</match>
+    <description>Suspicious DNS activity detected (SOC Lab)</description>
+    <group>dns_tunneling,mitre_t1071,</group>
+  </rule>
+
+  <!-- Malware communication detection -->
+  <rule id="100140" level="10">
+    <if_group>syslog</if_group>
+    <url>\.(tk|ml|ga|cf|bit\.ly|tinyurl|pastebin|hastebin)($|/)</url>
+    <description>Suspicious URL accessed (SOC Lab)</description>
+    <group>malware_communication,mitre_t1071,</group>
+  </rule>
+
+  <!-- User account manipulation -->
+  <rule id="100150" level="8">
+    <if_group>windows</if_group>
+    <match>net user|net localgroup|lusrmgr</match>
+    <description>User account manipulation detected (SOC Lab)</description>
+    <group>account_manipulation,mitre_t1098,</group>
+  </rule>
+
+  <!-- File integrity monitoring alerts -->
+  <rule id="100160" level="7">
+    <if_group>syscheck</if_group>
+    <match>/etc/passwd|/etc/shadow|/etc/sudoers|/etc/ssh/</match>
+    <description>Critical system file modified (SOC Lab)</description>
+    <group>file_integrity,pci_dss_11.5,</group>
+  </rule>
+
+  <!-- Rootkit detection -->
+  <rule id="100170" level="12">
+    <if_group>rootcheck</if_group>
+    <match>rootkit|trojan|backdoor</match>
+    <description>Rootkit or malware detected (SOC Lab)</description>
+    <group>rootkit,malware,pci_dss_11.4,</group>
+  </rule>
+
+  <!-- Vulnerability scanner detection -->
+  <rule id="100180" level="6">
+    <if_group>web</if_group>
+    <match>nikto|sqlmap|burp|owasp|zap|nessus|openvas</match>
+    <description>Vulnerability scanner detected (SOC Lab)</description>
+    <group>vulnerability_scan,mitre_t1046,</group>
+  </rule>
+
+  <!-- Brute force attack on web applications -->
+  <rule id="100190" level="8" frequency="10" timeframe="60">
+    <if_group>web</if_group>
+    <match>401|403|login|signin</match>
+    <description>Web application brute force attack (SOC Lab)</description>
+    <group>web_attack,brute_force,mitre_t1110,</group>
+  </rule>
+
+  <!-- Suspicious outbound connections -->
+  <rule id="100200" level="6">
+    <if_group>syslog</if_group>
+    <match>established.*:(4444|5555|6666|7777|8888|9999)</match>
+    <description>Suspicious outbound connection detected (SOC Lab)</description>
+    <group>suspicious_connection,mitre_t1071,</group>
+  </rule>
+
+</group>

@@ -1,0 +1,71 @@
+<!-- Local decoders for SOC Lab -->
+
+<!-- Custom web application decoder -->
+<decoder name="custom-web-access">
+  <parent>web-accesslog</parent>
+  <regex offset="after_parent">\S+ \S+ \S+ \[(\S+ \S+)\] "(\S+) (\S+) \S+" (\d+) \d+ "([^"]+)" "([^"]+)"</regex>
+  <order>timestamp,method,url,status,referer,user_agent</order>
+</decoder>
+
+<!-- PowerShell command decoder -->
+<decoder name="powershell-command">
+  <parent>windows-security</parent>
+  <regex>CommandLine":\s*"([^"]+)"</regex>
+  <order>command_line</order>
+</decoder>
+
+<!-- Process creation decoder -->
+<decoder name="process-creation">
+  <parent>windows-security</parent>
+  <regex>Image":\s*"([^"]+)"</regex>
+  <order>process_image</order>
+</decoder>
+
+<!-- Network connection decoder -->
+<decoder name="network-connection">
+  <parent>syslog</parent>
+  <regex>connection from (\d+\.\d+\.\d+\.\d+):(\d+) to (\d+\.\d+\.\d+\.\d+):(\d+)</regex>
+  <order>src_ip,src_port,dst_ip,dst_port</order>
+</decoder>
+
+<!-- SSH login decoder -->
+<decoder name="ssh-login-custom">
+  <parent>sshd</parent>
+  <regex>Accepted (\w+) for (\w+) from (\d+\.\d+\.\d+\.\d+) port (\d+)</regex>
+  <order>auth_method,user,src_ip,src_port</order>
+</decoder>
+
+<!-- Web shell detection decoder -->
+<decoder name="web-shell">
+  <parent>web-accesslog</parent>
+  <regex>\.(php|asp|jsp|py)\?.*cmd=([^&\s]+)</regex>
+  <order>script_type,command</order>
+</decoder>
+
+<!-- DNS query decoder -->
+<decoder name="dns-query">
+  <parent>named</parent>
+  <regex>query: (\S+) IN (\w+) \+([A-Z]+) \((\d+\.\d+\.\d+\.\d+)\)</regex>
+  <order>query_name,query_type,flags,client_ip</order>
+</decoder>
+
+<!-- File upload decoder -->
+<decoder name="file-upload">
+  <parent>web-accesslog</parent>
+  <regex>POST.*upload.*filename="([^"]+)"</regex>
+  <order>filename</order>
+</decoder>
+
+<!-- Registry modification decoder -->
+<decoder name="registry-mod">
+  <parent>windows-security</parent>
+  <regex>TargetObject":\s*"([^"]+)"</regex>
+  <order>registry_key</order>
+</decoder>
+
+<!-- Malware detection decoder -->
+<decoder name="malware-detection">
+  <parent>syslog</parent>
+  <regex>malware detected: (\w+) in file (\S+)</regex>
+  <order>malware_name,file_path</order>
+</decoder>
